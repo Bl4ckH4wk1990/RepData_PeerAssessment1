@@ -1,16 +1,8 @@
----
-title: "courseproject1"
-author: "Sven Otto"
-date: "27 March 2017"
-output:
-  html_document: 
-    keep_md: yes
-  pdf_document: default
----
+# courseproject1
+Sven Otto  
+27 March 2017  
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 # Reproducible Research Project 1  
 
 ## Introduction  
@@ -37,11 +29,13 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 ## Loading and preprocessing the data
 
 Loading the required packages:
-```{r ,results="hide"}
+
+```r
 library(ggplot2)
 ```
 Loading the data and assigning it to "activity". Afterwards basic processing is carried out:
-```{r}
+
+```r
 activity <- read.csv("activity.csv")
 
 activity$day <- weekdays(as.Date(activity$date))
@@ -52,48 +46,62 @@ activityclean <- na.omit(activity)
 ## Answering the assignement questions
 
 ### What is mean total number of steps taken per day?
-```{r}
+
+```r
 stepsperday <- aggregate(activity$steps ~ activity$date, FUN=sum)
 colnames(stepsperday) <- c("Day", "Steps")
 hist(stepsperday$Steps, xlab="Steps", main = "Histogram of Total Steps per Day")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
 Further calculation:
-```{r ,results="hide"}
+
+```r
 meansteps <- mean(stepsperday$Steps)
 mediansteps <- median(stepsperday$Steps)
 ```
-**The mean steps per day are `r meansteps` and the median steps are `r mediansteps`.** 
+**The mean steps per day are 1.0766189\times 10^{4} and the median steps are 10765.** 
 
 
 ### What is the average daily activity pattern?
-```{r}
+
+```r
 stepsperinterval <- aggregate(activity$steps ~ activity$interval, FUN=mean)
 colnames(stepsperinterval) <- c("Interval", "Steps")
 plot(stepsperinterval$Interval, stepsperinterval$Steps, type="l", xlab="5-Minute Interval",
      ylab="Steps", main="Average Steps per 5-Minute Interval")
 ```
 
-```{r}
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+
+
+```r
 maxsteps <- max(stepsperinterval$Steps)
 maxinterval <- stepsperinterval[stepsperinterval$Steps == maxsteps,1]
 ```
-**Interval `r maxinterval` contains the maximum number of steps at `r maxsteps` steps.**
+**Interval 835 contains the maximum number of steps at 206.1698113 steps.**
 
 
 ### Imputing missing values
 We calculate the numbers of rows for the original and cleaned data set(with NAs removed). Their difference tells us how many rows featured NA values
-```{r}
+
+```r
 activityclean <- na.omit(activity)
 
 raw <- nrow(activity)
 clean <- nrow(activityclean)
 raw-clean
 ```
+
+```
+## [1] 2304
+```
 As can be seen, 2304 rows feature NA values in the column "Steps".
 
 Their entries will be substituted with the average number of steps during that 5 minute interval over all days.
-```{r}
+
+```r
 completedactivity <- activity
 for (i in 1:nrow(completedactivity)) {
     if (is.na(completedactivity$steps[i])) {
@@ -106,37 +114,67 @@ for (i in 1:nrow(completedactivity)) {
 ```
 
 The NAs were successfully substituted. This can be seen by comparing the head outputs for activity (with NAs) vs. completedactivity (NAs substituted)
-```{r}
+
+```r
 head(activity)
+```
+
+```
+##   steps       date interval    day   DateTime
+## 1    NA 2012-10-01        0 Montag 2012-10-01
+## 2    NA 2012-10-01        5 Montag 2012-10-01
+## 3    NA 2012-10-01       10 Montag 2012-10-01
+## 4    NA 2012-10-01       15 Montag 2012-10-01
+## 5    NA 2012-10-01       20 Montag 2012-10-01
+## 6    NA 2012-10-01       25 Montag 2012-10-01
+```
+
+```r
 head(completedactivity)
 ```
 
+```
+##       steps       date interval    day   DateTime
+## 1 1.7169811 2012-10-01        0 Montag 2012-10-01
+## 2 0.3396226 2012-10-01        5 Montag 2012-10-01
+## 3 0.1320755 2012-10-01       10 Montag 2012-10-01
+## 4 0.1509434 2012-10-01       15 Montag 2012-10-01
+## 5 0.0754717 2012-10-01       20 Montag 2012-10-01
+## 6 2.0943396 2012-10-01       25 Montag 2012-10-01
+```
+
 Now we re-calcultate the first graph with the new dataset.
-```{r}
+
+```r
 stepsperday2 <- aggregate(completedactivity$steps ~ completedactivity$date, FUN=sum)
 colnames(stepsperday2) <- c("Day", "Steps")
 hist(stepsperday2$Steps, xlab="Steps", main = "Histogram of Total Steps per Day for Substituted NAs")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
   
-```{r ,results="hide"}
+
+```r
 meansteps2 <- mean(stepsperday2$Steps)
 mediansteps2 <- median(stepsperday2$Steps)
 ```
 
-**The mean steps per day are `r meansteps2` and the median steps are `r mediansteps2`.**   
+**The mean steps per day are 1.0766189\times 10^{4} and the median steps are 1.0766189\times 10^{4}.**   
 
 Comparing these values to the mean and median of the first tasks, the mean has not changed while the median has increased.
 
 ### Are there differences in activity patterns between weekdays and weekends?
 
 Separating weekdays from the weekend
-```{r}
+
+```r
 completedactivity$daytype <- ifelse(completedactivity$day %in% c("Samstag", "Sonntag"),
                                     "Weekend", "Weekday")
 ```
 
 Next we calculate the average weekday steps vs. average weekend steps and create the plot:
-```{r}
+
+```r
 stepsperinterval2 <- aggregate(steps ~ interval + daytype, data=completedactivity, FUN=mean)
 colnames(stepsperinterval2) <- c("Interval", "Daytype", "Steps")
 
@@ -149,6 +187,12 @@ qplot(Interval, Steps, data=stepsperinterval2,
       main="Average steps taken Weekends vs. Weekdays",
       facets =Daytype ~ .)
 ```
+
+```
+## Warning: Ignoring unknown parameters: type
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
 
 **As can be seem in the graph above, activity begins slightly earlier on weekdays than on the weekend.**
 
