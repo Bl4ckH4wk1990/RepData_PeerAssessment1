@@ -2,19 +2,23 @@
 title: "courseproject1"
 author: "Sven Otto"
 date: "27 March 2017"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-#Reproducible Research Project 1  
-##Introduction  
+# Reproducible Research Project 1  
+
+## Introduction  
+
 It is now possible to collect a large amount of data about personal movement using activity monitoring devices such as a Fitbit, Nike Fuelband, or Jawbone Up. These type of devices are part of the "quantified self" movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. But these data remain under-utilized both because the raw data are hard to obtain and there is a lack of statistical methods and software for processing and interpreting the data.  
 
 This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.  
 
-##Data For the Analysis
+## Data For the Analysis
 
 The data can be downloaded from the course web site:
 [Activity Monitoring Data](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip)  
@@ -29,7 +33,7 @@ The variables included in this dataset are:
 
 The dataset is stored in a comma-separated-value (CSV) file and there are a total of 17,568 observations in this dataset.
 
-##Loading and preprocessing the data
+## Loading and preprocessing the data
 
 Loading the required packages:
 ```{r ,results="hide"}
@@ -44,14 +48,16 @@ activity$DateTime<- as.POSIXct(activity$date, format="%Y-%m-%d")
 activityclean <- na.omit(activity)
 ```
 
-##Answering the assignement questions
-###What is mean total number of steps taken per day?
+## Answering the assignement questions
+
+### What is mean total number of steps taken per day?
 ```{r}
 stepsperday <- aggregate(activity$steps ~ activity$date, FUN=sum)
 colnames(stepsperday) <- c("Day", "Steps")
 hist(stepsperday$Steps, xlab="Steps", main = "Histogram of Total Steps per Day")
 ```
 
+Further calculation:
 ```{r ,results="hide"}
 meansteps <- mean(stepsperday$Steps)
 mediansteps <- median(stepsperday$Steps)
@@ -59,7 +65,7 @@ mediansteps <- median(stepsperday$Steps)
 **The mean steps per day are `r meansteps` and the median steps are `r mediansteps`.** 
 
 
-###What is the average daily activity pattern?
+### What is the average daily activity pattern?
 ```{r}
 stepsperinterval <- aggregate(activity$steps ~ activity$interval, FUN=mean)
 colnames(stepsperinterval) <- c("Interval", "Steps")
@@ -74,7 +80,7 @@ maxinterval <- stepsperinterval[stepsperinterval$Steps == maxsteps,1]
 **Interval `r maxinterval` contains the maximum number of steps at `r maxsteps` steps.**
 
 
-###Imputing missing values
+### Imputing missing values
 We calculate the numbers of rows for the original and cleaned data set(with NAs removed). Their difference tells us how many rows featured NA values
 ```{r}
 activityclean <- na.omit(activity)
@@ -86,7 +92,7 @@ raw-clean
 As can be seen, 2304 rows feature NA values in the column "Steps".
 
 Their entries will be substituted with the average number of steps during that 5 minute interval over all days.
-````{r}
+```{r}
 completedactivity <- activity
 for (i in 1:nrow(completedactivity)) {
     if (is.na(completedactivity$steps[i])) {
@@ -110,15 +116,17 @@ stepsperday2 <- aggregate(completedactivity$steps ~ completedactivity$date, FUN=
 colnames(stepsperday2) <- c("Day", "Steps")
 hist(stepsperday2$Steps, xlab="Steps", main = "Histogram of Total Steps per Day for Substituted NAs")
 ```
-
+  
 ```{r ,results="hide"}
 meansteps2 <- mean(stepsperday2$Steps)
 mediansteps2 <- median(stepsperday2$Steps)
 ```
+
 **The mean steps per day are `r meansteps2` and the median steps are `r mediansteps2`.**   
+
 Comparing these values to the mean and median of the first tasks, the mean has not changed while the median has increased.
 
-###Are there differences in activity patterns between weekdays and weekends?
+### Are there differences in activity patterns between weekdays and weekends?
 
 Separating weekdays from the weekend
 ```{r}
